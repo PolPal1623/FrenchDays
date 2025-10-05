@@ -717,12 +717,52 @@
     }
 
     /**
+     * Создаёт DOM-элемент с транскрипцией
+     * @param {{ipa?:string, ruPron?:string, singleValue?:string, singleClass?:string}} options
+     * @returns {HTMLSpanElement}
+     */
+    function createTranscriptionElement(options) {
+      const wrapper = document.createElement("span");
+      wrapper.className = "transcription";
+
+      if (options.singleValue) {
+        const inner = document.createElement("span");
+        inner.className = options.singleClass || "ipa";
+        inner.textContent = options.singleValue;
+        wrapper.append("(", " ", inner, " )");
+        return wrapper;
+      }
+
+      const ipaSpan = document.createElement("span");
+      ipaSpan.className = "ipa";
+      ipaSpan.textContent = options.ipa || "";
+
+      const ruSpan = document.createElement("span");
+      ruSpan.className = "ru-pron";
+      ruSpan.textContent = options.ruPron || "";
+
+      wrapper.append("(", " ", ipaSpan, " , ", ruSpan, " )");
+      return wrapper;
+    }
+
+    /**
+     * Заполняет элемент французским словом с транскрипциями
+     * @param {HTMLElement} target
+     * @param {{fr:string, ipa:string, ruPron:string}} day
+     */
+    function fillFrenchWithTranscription(target, day) {
+      target.textContent = "";
+      target.append(day.fr, " ");
+      target.append(createTranscriptionElement({ ipa: day.ipa, ruPron: day.ruPron }));
+    }
+
+    /**
      * Формирует разметку транскрипций в скобках
      * @param {{ipa:string, ruPron:string}} day
      * @returns {string}
      */
     function buildTranscription(day) {
-      return `<span class="transcription">(<span class="ipa">${day.ipa}</span>, <span class="ru-pron">${day.ruPron}</span>)</span>`;
+      return createTranscriptionElement({ ipa: day.ipa, ruPron: day.ruPron }).outerHTML;
     }
 
     /**
@@ -735,22 +775,14 @@
     }
 
     /**
-     * Оборачивает одиночную транскрипцию в скобки
-     * @param {string} value
-     * @param {"ipa"|"ru-pron"} className
-     * @returns {string}
-     */
-    function wrapSingleTranscription(value, className) {
-      return `<span class="transcription">(<span class="${className}">${value}</span>)</span>`;
-    }
-
-    /**
      * Объединяет французское слово с транскрипциями
      * @param {{fr:string, ipa:string, ruPron:string}} day
      * @returns {string}
      */
     function formatFrenchWithTranscription(day) {
-      return `${day.fr} ${buildTranscription(day)}`;
+      const wrapper = document.createElement("span");
+      fillFrenchWithTranscription(wrapper, day);
+      return wrapper.innerHTML;
     }
 
     /**
@@ -902,7 +934,7 @@
 
       const prompt = document.createElement("p");
       prompt.className = "prompt";
-      prompt.innerHTML = `${formatFrenchWithTranscription(day)}`;
+      fillFrenchWithTranscription(prompt, day);
       const srChoiceHint = document.createElement("span");
       srChoiceHint.className = "sr-only";
       srChoiceHint.textContent = "Выберите соответствующий русский день недели";
@@ -1060,7 +1092,8 @@
         label.className = "mnemonic-label";
         label.textContent = "Правильно:";
         const content = document.createElement("span");
-        content.innerHTML = `${formatFrenchWithTranscription(day)} — ${day.ru}`;
+        fillFrenchWithTranscription(content, day);
+        content.append(` — ${day.ru}`);
         helper.append(label, content);
         feedback.append(helper);
       }
@@ -1184,12 +1217,20 @@
       modalBody.innerHTML = "";
       DAYS.forEach((day) => {
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${day.fr}</td>
-          <td>${wrapSingleTranscription(day.ipa, "ipa")}</td>
-          <td>${wrapSingleTranscription(day.ruPron, "ru-pron")}</td>
-          <td>${day.ru}</td>
-        `;
+
+        const frCell = document.createElement("td");
+        frCell.textContent = day.fr;
+
+        const ipaCell = document.createElement("td");
+        ipaCell.append(createTranscriptionElement({ singleValue: day.ipa, singleClass: "ipa" }));
+
+        const ruPronCell = document.createElement("td");
+        ruPronCell.append(createTranscriptionElement({ singleValue: day.ruPron, singleClass: "ru-pron" }));
+
+        const ruCell = document.createElement("td");
+        ruCell.textContent = day.ru;
+
+        row.append(frCell, ipaCell, ruPronCell, ruCell);
         modalBody.appendChild(row);
       });
     }
@@ -1198,8 +1239,13 @@
      * Открывает модальное окно с управлением фокусом
      */
     function openModal(dialog) {
+      populateModal();
       if (typeof dialog.showModal === "function") {
         dialog.showModal();
+        const scrollHost = dialog.querySelector(".modal-table");
+        if (scrollHost) {
+          scrollHost.scrollTop = 0;
+        }
       }
     }
 
