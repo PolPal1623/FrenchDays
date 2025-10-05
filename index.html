@@ -266,14 +266,41 @@
       display: flex;
       flex-direction: column;
       gap: 0.25rem;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--muted);
+    }
+
+    .mnemonic-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .transcription {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: baseline;
     }
 
     .ipa {
       font-family: var(--mono-font);
-      font-size: 0.95rem;
       letter-spacing: 0.01em;
+      font-style: inherit;
+    }
+
+    .ru-pron {
+      font-style: inherit;
+      font-family: inherit;
+    }
+
+    .continue-btn {
+      align-self: flex-start;
+    }
+
+    .continue-btn[hidden] {
+      display: none;
     }
 
     .progress-container {
@@ -470,6 +497,7 @@
         <!-- Контент вопроса будет добавлен скриптом -->
       </div>
       <div class="feedback" id="feedback" role="status"></div>
+      <button class="secondary-btn continue-btn" id="continueButton" type="button" hidden>Продолжить</button>
       <div class="progress-container">
         <div class="progress-text">
           <span id="progressText">Раунд 0/8</span>
@@ -566,6 +594,7 @@
     const modalBody = document.getElementById("modalBody");
     const bestScoreEl = document.getElementById("bestScore");
     const themeToggle = document.getElementById("themeToggle");
+    const continueBtn = document.getElementById("continueButton");
 
     // --- Состояние сессии ---
     let dayDeck = [];
@@ -590,6 +619,11 @@
     });
     daysModal.addEventListener("cancel", () => daysModal.close());
     themeToggle.addEventListener("click", toggleTheme);
+    continueBtn.addEventListener("click", () => {
+      continueBtn.disabled = true;
+      hideContinueButton();
+      nextRound();
+    });
 
     // Закрытие модального окна по клику вне
     daysModal.addEventListener("click", (event) => {
@@ -620,6 +654,43 @@
     }
 
     /**
+     * Формирует разметку транскрипций в скобках
+     * @param {{ipa:string, ruPron:string}} day
+     * @returns {string}
+     */
+    function buildTranscription(day) {
+      return `<span class="transcription">(<span class="ipa">${day.ipa}</span>, <span class="ru-pron">${day.ruPron}</span>)</span>`;
+    }
+
+    /**
+     * Формирует текстовую версию транскрипций в скобках
+     * @param {{ipa:string, ruPron:string}} day
+     * @returns {string}
+     */
+    function buildTranscriptionText(day) {
+      return `(${day.ipa}, ${day.ruPron})`;
+    }
+
+    /**
+     * Оборачивает одиночную транскрипцию в скобки
+     * @param {string} value
+     * @param {"ipa"|"ru-pron"} className
+     * @returns {string}
+     */
+    function wrapSingleTranscription(value, className) {
+      return `<span class="transcription">(<span class="${className}">${value}</span>)</span>`;
+    }
+
+    /**
+     * Объединяет французское слово с транскрипциями
+     * @param {{fr:string, ipa:string, ruPron:string}} day
+     * @returns {string}
+     */
+    function formatFrenchWithTranscription(day) {
+      return `${day.fr} ${buildTranscription(day)}`;
+    }
+
+    /**
      * Старт новой игровой сессии
      */
     function startSession() {
@@ -632,6 +703,9 @@
       progressFill.style.width = "0%";
       scoreText.textContent = "0 правильных";
       feedback.classList.remove("visible");
+      feedback.removeAttribute("data-type");
+      feedback.innerHTML = "";
+      hideContinueButton();
       nextRound();
     }
 
@@ -676,11 +750,12 @@
       questionBody.innerHTML = "";
       feedback.classList.remove("visible");
       feedback.removeAttribute("data-type");
-      feedback.textContent = "";
+      feedback.innerHTML = "";
+      hideContinueButton();
 
       const metaText = question.type === QUESTION_TYPES.INPUT
-        ? "Введите французское слово"
-        : "Выберите перевод на русский";
+        ? "Формат: ввод"
+        : "Формат: выбор";
       questionTypeLabel.textContent = metaText;
 
       if (question.type === QUESTION_TYPES.INPUT) {
@@ -698,7 +773,11 @@
 
       const prompt = document.createElement("p");
       prompt.className = "prompt";
-      prompt.textContent = `Как по-французски будет «${day.ru}»?`;
+      prompt.textContent = day.ru;
+      const srDirections = document.createElement("span");
+      srDirections.className = "sr-only";
+      srDirections.textContent = "Введите французское написание";
+      prompt.append(srDirections);
 
       const form = document.createElement("form");
       form.setAttribute("aria-label", `Введите французский вариант для ${day.ru}`);
@@ -711,17 +790,17 @@
       input.setAttribute("aria-describedby", "inputHint");
       input.required = true;
 
-      const hint = document.createElement("span");
-      hint.id = "inputHint";
-      hint.className = "mnemonic";
-      hint.innerHTML = `Подсказка: <span class="ipa">${day.ipa}</span> — ${day.ruPron}`;
+      const srHint = document.createElement("span");
+      srHint.id = "inputHint";
+      srHint.className = "sr-only";
+      srHint.textContent = `Подсказка: французское слово произносится как ${day.ruPron}`;
 
       const submitBtn = document.createElement("button");
       submitBtn.type = "submit";
       submitBtn.className = "primary-btn";
       submitBtn.textContent = "Проверить";
 
-      form.append(input, submitBtn, hint);
+      form.append(input, submitBtn, srHint);
       questionBody.append(prompt, form);
       input.focus();
 
@@ -730,19 +809,19 @@
         const userAnswerRaw = input.value;
         const validationResult = validateInput(userAnswerRaw);
         if (!validationResult.valid) {
-          showFeedback(validationResult.message, false, day);
+          showFeedback(validationResult.message, "error");
           return;
         }
         const userAnswer = normalizeText(userAnswerRaw);
         const isCorrect = userAnswer === normalizeText(day.fr);
         registerAnswer({
           round: currentRound,
-          question: `«${day.ru}» → ?`,
+          question: day.ru,
           userAnswer: userAnswerRaw || "—",
-          correctAnswer: `${day.fr} (${day.ipa}, ${day.ruPron})`,
+          correctAnswer: formatFrenchWithTranscription(day),
           success: isCorrect
         });
-        finalizeRound(isCorrect, day, userAnswerRaw);
+        finalizeRound(isCorrect, day);
       });
 
       input.addEventListener("keydown", (event) => {
@@ -760,11 +839,16 @@
 
       const prompt = document.createElement("p");
       prompt.className = "prompt";
-      prompt.innerHTML = `${day.fr} <span class="ipa">${day.ipa}</span> — ${day.ruPron}. Что это за день по-русски?`;
+      prompt.innerHTML = `${formatFrenchWithTranscription(day)}`;
+      const srChoiceHint = document.createElement("span");
+      srChoiceHint.className = "sr-only";
+      srChoiceHint.textContent = "Выберите соответствующий русский день недели";
+      prompt.append(srChoiceHint);
 
       const optionsWrapper = document.createElement("div");
       optionsWrapper.className = "options";
       optionsWrapper.setAttribute("role", "radiogroup");
+      optionsWrapper.setAttribute("aria-label", `${day.fr} ${buildTranscriptionText(day)} — выберите перевод`);
 
       options.forEach((option, index) => {
         const button = document.createElement("button");
@@ -838,15 +922,15 @@
       const isCorrect = option.ru === day.ru;
       registerAnswer({
         round: currentRound,
-        question: `${day.fr} (${day.ipa}, ${day.ruPron})`,
+        question: formatFrenchWithTranscription(day),
         userAnswer: option.ru,
-        correctAnswer: `${day.ru}`,
+        correctAnswer: day.ru,
         success: isCorrect
       });
-      finalizeRound(isCorrect, day, option.ru);
       container.querySelectorAll(".option-btn").forEach((btn) => {
         btn.disabled = true;
       });
+      finalizeRound(isCorrect, day);
     }
 
     /**
@@ -871,33 +955,71 @@
     }
 
     /**
-     * Завершение раунда: показ обратной связи и переход далее
+     * Завершение раунда: показ обратной связи и кнопки продолжения
      */
-    function finalizeRound(isCorrect, day, userAnswerRaw) {
+    function finalizeRound(isCorrect, day) {
       if (isCorrect) {
         correctCount += 1;
       }
-      const statusMessage = isCorrect ? "Верно! Отличная работа." : `Неверно. Правильно: ${day.fr}`;
-      showFeedback(statusMessage, isCorrect, day);
+      const statusMessage = isCorrect ? "Верно!" : "Неверно.";
+      showFeedback(statusMessage, isCorrect ? "success" : "error", day, true);
+      disableInputsAfterAnswer();
       updateProgress();
-      setTimeout(() => nextRound(), 900);
+      showContinueButton();
     }
 
     /**
      * Показ обратной связи
      */
-    function showFeedback(message, isSuccess, day) {
-      const icon = isSuccess
-        ? '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" /></svg>'
-        : '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6" /><path d="M9 9l6 6" /></svg>';
+    function showFeedback(message, type, day = null, revealHint = false) {
+      let iconMarkup = "";
+      if (type === "success") {
+        iconMarkup = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" /></svg>';
+      } else if (type === "error") {
+        iconMarkup = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6" /><path d="M9 9l6 6" /></svg>';
+      }
 
-      feedback.innerHTML = `${icon}<span>${message}</span>`;
-      feedback.setAttribute("data-type", isSuccess ? "success" : "error");
-      const helper = document.createElement("div");
-      helper.className = "mnemonic";
-      helper.innerHTML = `${day.fr} · <span class="ipa">${day.ipa}</span> · ${day.ruPron}`;
-      feedback.append(helper);
+      if (type) {
+        feedback.setAttribute("data-type", type);
+      } else {
+        feedback.removeAttribute("data-type");
+      }
+
+      feedback.innerHTML = iconMarkup;
+      const textSpan = document.createElement("span");
+      textSpan.textContent = message;
+      feedback.append(textSpan);
+
+      if (revealHint && day) {
+        const helper = document.createElement("div");
+        helper.className = "mnemonic";
+        const label = document.createElement("span");
+        label.className = "mnemonic-label";
+        label.textContent = "Правильно:";
+        const content = document.createElement("span");
+        content.innerHTML = `${formatFrenchWithTranscription(day)} — ${day.ru}`;
+        helper.append(label, content);
+        feedback.append(helper);
+      }
+
       feedback.classList.add("visible");
+    }
+
+    /**
+     * Блокирует элементы ввода после ответа
+     */
+    function disableInputsAfterAnswer() {
+      const textInput = questionBody.querySelector("input[type=\"text\"]");
+      if (textInput) {
+        textInput.disabled = true;
+      }
+      const submitButton = questionBody.querySelector("button[type=\"submit\"]");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      questionBody.querySelectorAll(".option-btn").forEach((btn) => {
+        btn.disabled = true;
+      });
     }
 
     /**
@@ -908,6 +1030,25 @@
       scoreText.textContent = `${correctCount} правильных`;
       const percent = (Math.min(currentRound, TOTAL_ROUNDS) / TOTAL_ROUNDS) * 100;
       progressFill.style.width = `${percent}%`;
+    }
+
+    /**
+     * Показывает кнопку продолжения
+     */
+    function showContinueButton() {
+      const label = currentRound >= TOTAL_ROUNDS ? "Показать результаты" : "Продолжить";
+      continueBtn.textContent = label;
+      continueBtn.hidden = false;
+      continueBtn.disabled = false;
+      continueBtn.focus();
+    }
+
+    /**
+     * Скрывает кнопку продолжения
+     */
+    function hideContinueButton() {
+      continueBtn.hidden = true;
+      continueBtn.disabled = true;
     }
 
     /**
@@ -982,8 +1123,8 @@
         const row = document.createElement("tr");
         row.innerHTML = `
           <td>${day.fr}</td>
-          <td class="ipa">${day.ipa}</td>
-          <td>${day.ruPron}</td>
+          <td>${wrapSingleTranscription(day.ipa, "ipa")}</td>
+          <td>${wrapSingleTranscription(day.ruPron, "ru-pron")}</td>
           <td>${day.ru}</td>
         `;
         modalBody.appendChild(row);
