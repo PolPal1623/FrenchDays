@@ -414,13 +414,15 @@
     }
 
     dialog {
-      width: min(480px, 90vw);
+      width: min(640px, 92vw);
+      max-height: min(85vh, 640px);
       border: none;
-      border-radius: 20px;
-      padding: 1.5rem;
+      border-radius: 22px;
+      padding: 0;
       background: var(--surface-strong);
       color: var(--text);
       box-shadow: var(--shadow);
+      overflow: hidden;
     }
 
     dialog::backdrop {
@@ -428,15 +430,76 @@
       backdrop-filter: blur(4px);
     }
 
+    dialog form {
+      margin: 0;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      height: 100%;
+    }
+
     dialog h3 {
-      margin-top: 0;
+      margin: 0;
+      font-size: clamp(1.1rem, 3vw, 1.35rem);
+    }
+
+    .modal-description {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
     }
 
     .modal-table {
-      margin-top: 1rem;
       border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
+      border-radius: 18px;
+      overflow: auto;
+      flex: 1 1 auto;
+      background: var(--surface);
+    }
+
+    .modal-table table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 100%;
+    }
+
+    .modal-table th,
+    .modal-table td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      font-size: clamp(0.85rem, 2.2vw, 0.95rem);
+      vertical-align: top;
+    }
+
+    .modal-table th {
+      position: sticky;
+      top: 0;
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: clamp(0.75rem, 2vw, 0.8rem);
+    }
+
+    .modal-table tbody tr:nth-child(even) {
+      background: rgba(148, 163, 184, 0.08);
+    }
+
+    .modal-table tbody tr:hover {
+      background: rgba(37, 99, 235, 0.12);
+    }
+
+    .modal-table td .transcription {
+      font-size: 0.8rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
     }
 
     .helper-link {
@@ -535,10 +598,10 @@
     <a class="helper-link" href="#" id="helperLink">Справка / Как произносить →</a>
   </main>
 
-  <dialog id="daysModal" aria-modal="true" aria-labelledby="daysModalTitle">
+  <dialog id="daysModal" aria-modal="true" aria-labelledby="daysModalTitle" aria-describedby="daysModalDescription">
     <form method="dialog">
       <h3 id="daysModalTitle">Все дни недели</h3>
-      <p>Французское написание, IPA и удобная русская подсказка произношения.</p>
+      <p class="modal-description" id="daysModalDescription">Французское написание, IPA и русская подсказка произношения в едином стиле.</p>
       <div class="modal-table">
         <table>
           <thead>
@@ -552,7 +615,7 @@
           <tbody id="modalBody"></tbody>
         </table>
       </div>
-      <div style="text-align: right; margin-top: 1rem;">
+      <div class="modal-footer">
         <button class="secondary-btn" value="cancel">Закрыть</button>
       </div>
     </form>
