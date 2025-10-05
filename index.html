@@ -1,0 +1,1234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111827">
+  <title>Французские дни недели — тренажёр</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --font-family: "Inter", "SF Pro Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --mono-font: "Fira Code", "SFMono-Regular", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      --bg: #f4f5f7;
+      --surface: rgba(255, 255, 255, 0.88);
+      --surface-strong: #ffffff;
+      --text: #1f2933;
+      --muted: #52606d;
+      --accent: #2563eb;
+      --accent-strong: #1d4ed8;
+      --danger: #dc2626;
+      --success: #059669;
+      --border: rgba(15, 23, 42, 0.12);
+      --shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.45);
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --surface: rgba(15, 23, 42, 0.85);
+      --surface-strong: rgba(30, 41, 59, 0.9);
+      --text: #f8fafc;
+      --muted: #cbd5f5;
+      --accent: #60a5fa;
+      --accent-strong: #3b82f6;
+      --danger: #f87171;
+      --success: #34d399;
+      --border: rgba(148, 163, 184, 0.18);
+      --shadow: 0 24px 50px -30px rgba(15, 23, 42, 0.9);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0f172a;
+        --surface: rgba(15, 23, 42, 0.85);
+        --surface-strong: rgba(30, 41, 59, 0.9);
+        --text: #f8fafc;
+        --muted: #cbd5f5;
+        --accent: #60a5fa;
+        --accent-strong: #3b82f6;
+        --danger: #f87171;
+        --success: #34d399;
+        --border: rgba(148, 163, 184, 0.18);
+        --shadow: 0 24px 50px -30px rgba(15, 23, 42, 0.9);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--font-family);
+      background: radial-gradient(circle at top, rgba(59, 130, 246, 0.09), transparent 60%), var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem;
+      transition: background 220ms ease-in-out, color 220ms ease-in-out;
+    }
+
+    main {
+      width: min(720px, 100%);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: clamp(1.5rem, 5vw, 2.2rem);
+      letter-spacing: -0.01em;
+    }
+
+    .theme-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.4rem 0.9rem;
+      font-size: 0.95rem;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 200ms ease, transform 200ms ease, border 200ms ease;
+    }
+
+    .theme-toggle:focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .theme-toggle:hover {
+      transform: translateY(-1px);
+      background: var(--surface);
+    }
+
+    .card {
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: clamp(1.5rem, 3vw, 2.5rem);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      transition: background 220ms ease, border 220ms ease, box-shadow 220ms ease;
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: clamp(1.25rem, 4vw, 1.8rem);
+    }
+
+    .question-meta {
+      font-size: 0.95rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .question-body {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .prompt {
+      font-size: clamp(1.2rem, 5vw, 1.8rem);
+      font-weight: 600;
+      text-align: center;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      font-size: 1.1rem;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      transition: border 200ms ease, box-shadow 200ms ease;
+    }
+
+    .text-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2);
+      outline: none;
+    }
+
+    .primary-btn {
+      border: none;
+      border-radius: 14px;
+      padding: 0.9rem 1.2rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      cursor: pointer;
+      transition: transform 200ms ease, box-shadow 200ms ease, filter 200ms ease;
+    }
+
+    .primary-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.6;
+      box-shadow: none;
+    }
+
+    .primary-btn:not(:disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px -12px rgba(37, 99, 235, 0.6);
+    }
+
+    .primary-btn:focus-visible {
+      outline: 3px solid rgba(59, 130, 246, 0.35);
+      outline-offset: 2px;
+    }
+
+    .options {
+      display: grid;
+      gap: 0.75rem;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    }
+
+    .option-btn {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      color: var(--text);
+      font-size: 1rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 200ms ease, transform 200ms ease, border 200ms ease;
+    }
+
+    .option-btn:hover,
+    .option-btn:focus-visible {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .feedback {
+      padding: 1rem;
+      border-radius: 18px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      display: none;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.95rem;
+    }
+
+    .feedback.visible {
+      display: flex;
+    }
+
+    .feedback svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .feedback[data-type="success"] {
+      border-color: rgba(5, 150, 105, 0.45);
+      color: var(--success);
+    }
+
+    .feedback[data-type="error"] {
+      border-color: rgba(220, 38, 38, 0.45);
+      color: var(--danger);
+    }
+
+    .mnemonic {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    .mnemonic-label {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .transcription {
+      font-size: 0.85rem;
+      font-style: italic;
+      color: var(--muted);
+      display: inline-flex;
+      gap: 0.35rem;
+      align-items: baseline;
+    }
+
+    .ipa {
+      font-family: var(--mono-font);
+      letter-spacing: 0.01em;
+      font-style: inherit;
+    }
+
+    .ru-pron {
+      font-style: inherit;
+      font-family: inherit;
+    }
+
+    .continue-btn {
+      align-self: flex-start;
+    }
+
+    .continue-btn[hidden] {
+      display: none;
+    }
+
+    .progress-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .progress-text {
+      font-size: 0.95rem;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: rgba(148, 163, 184, 0.28);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+      border-radius: inherit;
+      transition: width 220ms ease;
+    }
+
+    .results {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .results.visible {
+      display: flex;
+    }
+
+    .stat {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    th {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    .tag.success {
+      background: rgba(5, 150, 105, 0.16);
+      color: var(--success);
+    }
+
+    .tag.error {
+      background: rgba(220, 38, 38, 0.16);
+      color: var(--danger);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .secondary-btn {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      color: var(--text);
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 200ms ease, border 200ms ease, transform 200ms ease;
+    }
+
+    .secondary-btn:hover,
+    .secondary-btn:focus-visible {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .reference-panel {
+      margin-top: 1.5rem;
+      border-top: 1px solid var(--border);
+      padding-top: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .reference-panel h3 {
+      margin: 0;
+      font-size: clamp(1.05rem, 3vw, 1.3rem);
+    }
+
+    .reference-panel .reference-description {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .reference-table {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: auto;
+      background: var(--surface);
+    }
+
+    .reference-table table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 100%;
+    }
+
+    .reference-table th,
+    .reference-table td {
+      padding: 0.85rem 1rem;
+      text-align: left;
+      font-size: clamp(0.85rem, 2.2vw, 0.95rem);
+      vertical-align: top;
+    }
+
+    .reference-table th {
+      background: rgba(37, 99, 235, 0.08);
+      color: var(--muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: clamp(0.75rem, 2vw, 0.8rem);
+      position: sticky;
+      top: 0;
+    }
+
+    .reference-table tbody tr:nth-child(even) {
+      background: rgba(148, 163, 184, 0.08);
+    }
+
+    .reference-table td .transcription {
+      font-size: 0.8rem;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding: 3rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1 class="app-title">Французские дни недели</h1>
+      <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
+        <span aria-hidden="true">🌗</span>
+        <span>Тема</span>
+      </button>
+    </header>
+
+    <section class="card" aria-live="polite" aria-atomic="true">
+      <div class="question-meta">
+        <span id="questionType">Тип вопроса</span>
+        <span id="bestScore" aria-live="polite"></span>
+      </div>
+      <div class="question-body" id="questionBody">
+        <!-- Контент вопроса будет добавлен скриптом -->
+      </div>
+      <div class="feedback" id="feedback" role="status"></div>
+      <button class="secondary-btn continue-btn" id="continueButton" type="button" hidden>Продолжить</button>
+      <div class="progress-container">
+        <div class="progress-text">
+          <span id="progressText">Раунд 0/8</span>
+          <span id="scoreText">0 правильных</span>
+        </div>
+        <div class="progress-bar" aria-hidden="true">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card results" id="results" aria-live="polite" aria-hidden="true">
+      <h2>Итоги сессии</h2>
+      <p class="stat" id="finalScore"></p>
+      <div class="actions">
+        <button class="primary-btn" type="button" id="playAgain">Сыграть ещё раз</button>
+        <button class="secondary-btn" type="button" id="showAllDaysResults" aria-expanded="false" aria-controls="referencePanel">Показать все дни</button>
+      </div>
+      <div class="table-wrapper">
+        <table aria-describedby="finalScore">
+          <thead>
+            <tr>
+              <th scope="col">Раунд</th>
+              <th scope="col">Вопрос</th>
+              <th scope="col">Ответ</th>
+              <th scope="col">Статус</th>
+              <th scope="col">Правильно</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
+      <div class="reference-panel" id="referencePanel" hidden>
+        <h3 id="referenceTitle" tabindex="-1">Все дни недели</h3>
+        <p class="reference-description">Французское написание с транскрипциями и переводом.</p>
+        <div class="reference-table">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">FR</th>
+                <th scope="col">IPA</th>
+                <th scope="col">Рус. транскр.</th>
+                <th scope="col">Перевод</th>
+              </tr>
+            </thead>
+            <tbody id="referenceBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // --- Данные для обучения ---
+    const DAYS = [
+      { ru: "понедельник", fr: "lundi", ipa: "lœ̃.di", ruPron: "лёнди" },
+      { ru: "вторник", fr: "mardi", ipa: "maʁ.di", ruPron: "марди" },
+      { ru: "среда", fr: "mercredi", ipa: "mɛʁ.kʁə.di", ruPron: "мэркрэди" },
+      { ru: "четверг", fr: "jeudi", ipa: "ʒø.di", ruPron: "жёди" },
+      { ru: "пятница", fr: "vendredi", ipa: "vɑ̃.dʁə.di", ruPron: "вандрэди" },
+      { ru: "суббота", fr: "samedi", ipa: "sam.di", ruPron: "самди" },
+      { ru: "воскресенье", fr: "dimanche", ipa: "di.mɑ̃ʃ", ruPron: "диманш" }
+    ];
+
+    // --- Константы приложения ---
+    const TOTAL_ROUNDS = 8;
+    const QUESTION_TYPES = {
+      INPUT: "input",
+      CHOICE: "choice"
+    };
+
+    // --- Элементы интерфейса ---
+    const questionBody = document.getElementById("questionBody");
+    const questionTypeLabel = document.getElementById("questionType");
+    const feedback = document.getElementById("feedback");
+    const progressText = document.getElementById("progressText");
+    const scoreText = document.getElementById("scoreText");
+    const progressFill = document.getElementById("progressFill");
+    const resultsSection = document.getElementById("results");
+    const resultsBody = document.getElementById("resultsBody");
+    const finalScore = document.getElementById("finalScore");
+    const playAgainBtn = document.getElementById("playAgain");
+    const showAllDaysBtn = document.getElementById("showAllDaysResults");
+    const referencePanel = document.getElementById("referencePanel");
+    const referenceBody = document.getElementById("referenceBody");
+    const referenceTitle = document.getElementById("referenceTitle");
+    const bestScoreEl = document.getElementById("bestScore");
+    const themeToggle = document.getElementById("themeToggle");
+    const continueBtn = document.getElementById("continueButton");
+
+    // --- Состояние сессии ---
+    let dayDeck = [];
+    let currentRound = 0;
+    let correctCount = 0;
+    let questionHistory = [];
+    let currentQuestion = null;
+    let bestScore = loadBestScore();
+
+    // --- Инициализация ---
+    applyStoredTheme();
+    updateBestScoreBadge();
+    collapseReferencePanel();
+    populateReferenceTable();
+    startSession();
+
+    // --- Обработчики ---
+    playAgainBtn.addEventListener("click", startSession);
+    showAllDaysBtn.addEventListener("click", toggleReferencePanel);
+    themeToggle.addEventListener("click", toggleTheme);
+    continueBtn.addEventListener("click", () => {
+      continueBtn.disabled = true;
+      hideContinueButton();
+      nextRound();
+    });
+
+    // --- Функции логики игры ---
+
+    /**
+     * Перетасовывает копию массива по Фишеру–Йетсу
+     * @template T
+     * @param {T[]} items
+     * @returns {T[]}
+     */
+    function shuffle(items) {
+      const array = [...items];
+      for (let i = array.length - 1; i > 0; i -= 1) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    /**
+     * Создаёт DOM-элемент с транскрипцией
+     * @param {{ipa?:string, ruPron?:string, singleValue?:string, singleClass?:string}} options
+     * @returns {HTMLSpanElement}
+     */
+    function createTranscriptionElement(options) {
+      const wrapper = document.createElement("span");
+      wrapper.className = "transcription";
+
+      if (options.singleValue) {
+        const inner = document.createElement("span");
+        inner.className = options.singleClass || "ipa";
+        inner.textContent = options.singleValue;
+        wrapper.append("(", " ", inner, " )");
+        return wrapper;
+      }
+
+      const ipaSpan = document.createElement("span");
+      ipaSpan.className = "ipa";
+      ipaSpan.textContent = options.ipa || "";
+
+      const ruSpan = document.createElement("span");
+      ruSpan.className = "ru-pron";
+      ruSpan.textContent = options.ruPron || "";
+
+      wrapper.append("(", " ", ipaSpan, " , ", ruSpan, " )");
+      return wrapper;
+    }
+
+    /**
+     * Заполняет элемент французским словом с транскрипциями
+     * @param {HTMLElement} target
+     * @param {{fr:string, ipa:string, ruPron:string}} day
+     */
+    function fillFrenchWithTranscription(target, day) {
+      target.textContent = "";
+      target.append(day.fr, " ");
+      target.append(createTranscriptionElement({ ipa: day.ipa, ruPron: day.ruPron }));
+    }
+
+    /**
+     * Формирует разметку транскрипций в скобках
+     * @param {{ipa:string, ruPron:string}} day
+     * @returns {string}
+     */
+    function buildTranscription(day) {
+      return createTranscriptionElement({ ipa: day.ipa, ruPron: day.ruPron }).outerHTML;
+    }
+
+    /**
+     * Формирует текстовую версию транскрипций в скобках
+     * @param {{ipa:string, ruPron:string}} day
+     * @returns {string}
+     */
+    function buildTranscriptionText(day) {
+      return `(${day.ipa}, ${day.ruPron})`;
+    }
+
+    /**
+     * Объединяет французское слово с транскрипциями
+     * @param {{fr:string, ipa:string, ruPron:string}} day
+     * @returns {string}
+     */
+    function formatFrenchWithTranscription(day) {
+      const wrapper = document.createElement("span");
+      fillFrenchWithTranscription(wrapper, day);
+      return wrapper.innerHTML;
+    }
+
+    /**
+     * Старт новой игровой сессии
+     */
+    function startSession() {
+      currentRound = 0;
+      correctCount = 0;
+      questionHistory = [];
+      dayDeck = shuffle(DAYS);
+      resultsSection.classList.remove("visible");
+      resultsSection.setAttribute("aria-hidden", "true");
+      progressFill.style.width = "0%";
+      scoreText.textContent = "0 правильных";
+      feedback.classList.remove("visible");
+      feedback.removeAttribute("data-type");
+      feedback.innerHTML = "";
+      hideContinueButton();
+      collapseReferencePanel();
+      nextRound();
+    }
+
+    /**
+     * Переходит к следующему раунду или показывает результат
+     */
+    function nextRound() {
+      if (currentRound >= TOTAL_ROUNDS) {
+        showResults();
+        return;
+      }
+
+      if (dayDeck.length === 0) {
+        dayDeck = shuffle(DAYS);
+      }
+
+      currentQuestion = pickQuestion(dayDeck.pop());
+      currentRound += 1;
+      renderQuestion(currentQuestion);
+      updateProgress();
+    }
+
+    /**
+     * Генерирует структуру вопроса
+     * @param {{ru:string, fr:string, ipa:string, ruPron:string}} day
+     */
+    function pickQuestion(day) {
+      const type = Math.random() < 0.5 ? QUESTION_TYPES.INPUT : QUESTION_TYPES.CHOICE;
+      if (type === QUESTION_TYPES.CHOICE) {
+        const distractors = shuffle(DAYS.filter((item) => item.ru !== day.ru)).slice(0, 3);
+        const options = shuffle([day, ...distractors]);
+        return { type, day, options };
+      }
+      return { type, day };
+    }
+
+    /**
+     * Отрисовывает вопрос в интерфейсе
+     * @param {{type:string, day:object, options?:object[]}} question
+     */
+    function renderQuestion(question) {
+      questionBody.innerHTML = "";
+      feedback.classList.remove("visible");
+      feedback.removeAttribute("data-type");
+      feedback.innerHTML = "";
+      hideContinueButton();
+
+      const metaText = question.type === QUESTION_TYPES.INPUT
+        ? "Формат: ввод"
+        : "Формат: выбор";
+      questionTypeLabel.textContent = metaText;
+
+      if (question.type === QUESTION_TYPES.INPUT) {
+        renderInputQuestion(question);
+      } else {
+        renderChoiceQuestion(question);
+      }
+    }
+
+    /**
+     * Отрисовывает вопрос с вводом
+     */
+    function renderInputQuestion(question) {
+      const { day } = question;
+
+      const prompt = document.createElement("p");
+      prompt.className = "prompt";
+      prompt.textContent = day.ru;
+      const srDirections = document.createElement("span");
+      srDirections.className = "sr-only";
+      srDirections.textContent = "Введите французское написание";
+      prompt.append(srDirections);
+
+      const form = document.createElement("form");
+      form.setAttribute("aria-label", `Введите французский вариант для ${day.ru}`);
+
+      const input = document.createElement("input");
+      input.type = "text";
+      input.className = "text-input";
+      input.name = "answer";
+      input.autocomplete = "off";
+      input.setAttribute("aria-describedby", "inputHint");
+      input.required = true;
+
+      const srHint = document.createElement("span");
+      srHint.id = "inputHint";
+      srHint.className = "sr-only";
+      srHint.textContent = `Подсказка: французское слово произносится как ${day.ruPron}`;
+
+      const submitBtn = document.createElement("button");
+      submitBtn.type = "submit";
+      submitBtn.className = "primary-btn";
+      submitBtn.textContent = "Проверить";
+
+      form.append(input, submitBtn, srHint);
+      questionBody.append(prompt, form);
+      input.focus();
+
+      form.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const userAnswerRaw = input.value;
+        const validationResult = validateInput(userAnswerRaw);
+        if (!validationResult.valid) {
+          showFeedback(validationResult.message, "error");
+          return;
+        }
+        const userAnswer = normalizeText(userAnswerRaw);
+        const isCorrect = userAnswer === normalizeText(day.fr);
+        registerAnswer({
+          round: currentRound,
+          question: day.ru,
+          userAnswer: userAnswerRaw || "—",
+          correctAnswer: formatFrenchWithTranscription(day),
+          success: isCorrect
+        });
+        finalizeRound(isCorrect, day);
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          submitBtn.click();
+        }
+      });
+    }
+
+    /**
+     * Отрисовывает вопрос с вариантами выбора
+     */
+    function renderChoiceQuestion(question) {
+      const { day, options } = question;
+
+      const prompt = document.createElement("p");
+      prompt.className = "prompt";
+      fillFrenchWithTranscription(prompt, day);
+      const srChoiceHint = document.createElement("span");
+      srChoiceHint.className = "sr-only";
+      srChoiceHint.textContent = "Выберите соответствующий русский день недели";
+      prompt.append(srChoiceHint);
+
+      const optionsWrapper = document.createElement("div");
+      optionsWrapper.className = "options";
+      optionsWrapper.setAttribute("role", "radiogroup");
+      optionsWrapper.setAttribute("aria-label", `${day.fr} ${buildTranscriptionText(day)} — выберите перевод`);
+
+      options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "option-btn";
+        button.textContent = option.ru;
+        button.setAttribute("role", "radio");
+        button.setAttribute("aria-checked", "false");
+        button.dataset.value = option.ru;
+
+        button.addEventListener("click", () => {
+          selectOption(button, optionsWrapper);
+          checkChoiceAnswer(option, day, optionsWrapper);
+        });
+
+        button.addEventListener("keydown", (event) => handleOptionKeydown(event, optionsWrapper, index));
+
+        optionsWrapper.appendChild(button);
+      });
+
+      questionBody.append(prompt, optionsWrapper);
+      focusFirstOption(optionsWrapper);
+    }
+
+    /**
+     * Обработка навигации стрелками
+     */
+    function handleOptionKeydown(event, container, index) {
+      const buttons = Array.from(container.querySelectorAll(".option-btn"));
+      const lastIndex = buttons.length - 1;
+      if (["ArrowRight", "ArrowDown"].includes(event.key)) {
+        event.preventDefault();
+        const nextIndex = index === lastIndex ? 0 : index + 1;
+        buttons[nextIndex].focus();
+      }
+      if (["ArrowLeft", "ArrowUp"].includes(event.key)) {
+        event.preventDefault();
+        const prevIndex = index === 0 ? lastIndex : index - 1;
+        buttons[prevIndex].focus();
+      }
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        buttons[index].click();
+      }
+    }
+
+    /**
+     * Фокус на первую опцию при рендере
+     */
+    function focusFirstOption(container) {
+      const first = container.querySelector(".option-btn");
+      if (first) {
+        first.focus();
+      }
+    }
+
+    /**
+     * Выбор варианта пользователем
+     */
+    function selectOption(button, container) {
+      container.querySelectorAll(".option-btn").forEach((btn) => {
+        btn.setAttribute("aria-checked", "false");
+      });
+      button.setAttribute("aria-checked", "true");
+    }
+
+    /**
+     * Проверяет вариант из списка
+     */
+    function checkChoiceAnswer(option, day, container) {
+      const isCorrect = option.ru === day.ru;
+      registerAnswer({
+        round: currentRound,
+        question: formatFrenchWithTranscription(day),
+        userAnswer: option.ru,
+        correctAnswer: day.ru,
+        success: isCorrect
+      });
+      container.querySelectorAll(".option-btn").forEach((btn) => {
+        btn.disabled = true;
+      });
+      finalizeRound(isCorrect, day);
+    }
+
+    /**
+     * Проверяет и нормализует текст ответа
+     */
+    function validateInput(value) {
+      if (!value.trim()) {
+        return { valid: false, message: "Введите ответ. Пустая строка не засчитывается." };
+      }
+      return { valid: true };
+    }
+
+    /**
+     * Нормализация текста для сравнения
+     */
+    function normalizeText(text) {
+      return text
+        .normalize("NFC")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    /**
+     * Завершение раунда: показ обратной связи и кнопки продолжения
+     */
+    function finalizeRound(isCorrect, day) {
+      if (isCorrect) {
+        correctCount += 1;
+      }
+      const statusMessage = isCorrect ? "Верно!" : "Неверно.";
+      showFeedback(statusMessage, isCorrect ? "success" : "error", day, true);
+      disableInputsAfterAnswer();
+      updateProgress();
+      showContinueButton();
+    }
+
+    /**
+     * Показ обратной связи
+     */
+    function showFeedback(message, type, day = null, revealHint = false) {
+      let iconMarkup = "";
+      if (type === "success") {
+        iconMarkup = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" /></svg>';
+      } else if (type === "error") {
+        iconMarkup = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M15 9l-6 6" /><path d="M9 9l6 6" /></svg>';
+      }
+
+      if (type) {
+        feedback.setAttribute("data-type", type);
+      } else {
+        feedback.removeAttribute("data-type");
+      }
+
+      feedback.innerHTML = iconMarkup;
+      const textSpan = document.createElement("span");
+      textSpan.textContent = message;
+      feedback.append(textSpan);
+
+      if (revealHint && day) {
+        const helper = document.createElement("div");
+        helper.className = "mnemonic";
+        const label = document.createElement("span");
+        label.className = "mnemonic-label";
+        label.textContent = "Правильно:";
+        const content = document.createElement("span");
+        fillFrenchWithTranscription(content, day);
+        content.append(` — ${day.ru}`);
+        helper.append(label, content);
+        feedback.append(helper);
+      }
+
+      feedback.classList.add("visible");
+    }
+
+    /**
+     * Блокирует элементы ввода после ответа
+     */
+    function disableInputsAfterAnswer() {
+      const textInput = questionBody.querySelector("input[type=\"text\"]");
+      if (textInput) {
+        textInput.disabled = true;
+      }
+      const submitButton = questionBody.querySelector("button[type=\"submit\"]");
+      if (submitButton) {
+        submitButton.disabled = true;
+      }
+      questionBody.querySelectorAll(".option-btn").forEach((btn) => {
+        btn.disabled = true;
+      });
+    }
+
+    /**
+     * Обновление прогресса
+     */
+    function updateProgress() {
+      progressText.textContent = `Раунд ${Math.min(currentRound, TOTAL_ROUNDS)}/${TOTAL_ROUNDS}`;
+      scoreText.textContent = `${correctCount} правильных`;
+      const percent = (Math.min(currentRound, TOTAL_ROUNDS) / TOTAL_ROUNDS) * 100;
+      progressFill.style.width = `${percent}%`;
+    }
+
+    /**
+     * Показывает кнопку продолжения
+     */
+    function showContinueButton() {
+      const label = currentRound >= TOTAL_ROUNDS ? "Показать результаты" : "Продолжить";
+      continueBtn.textContent = label;
+      continueBtn.hidden = false;
+      continueBtn.disabled = false;
+      continueBtn.focus();
+    }
+
+    /**
+     * Скрывает кнопку продолжения
+     */
+    function hideContinueButton() {
+      continueBtn.hidden = true;
+      continueBtn.disabled = true;
+    }
+
+    /**
+     * Фиксирует ответ пользователя в истории
+     */
+    function registerAnswer(entry) {
+      questionHistory.push(entry);
+    }
+
+    /**
+     * Показ финальной статистики
+     */
+    function showResults() {
+      const percent = Math.round((correctCount / TOTAL_ROUNDS) * 100);
+      finalScore.textContent = `Правильных ответов: ${correctCount} из ${TOTAL_ROUNDS} (${percent}%)`;
+      resultsBody.innerHTML = "";
+      questionHistory.forEach((item) => {
+        const row = document.createElement("tr");
+        const statusClass = item.success ? "success" : "error";
+        row.innerHTML = `
+          <td>${item.round}</td>
+          <td>${item.question}</td>
+          <td>${item.userAnswer}</td>
+          <td><span class="tag ${statusClass}">${item.success ? "верно" : "ошибка"}</span></td>
+          <td>${item.correctAnswer}</td>
+        `;
+        resultsBody.appendChild(row);
+      });
+      resultsSection.classList.add("visible");
+      resultsSection.setAttribute("aria-hidden", "false");
+      feedback.classList.remove("visible");
+      saveBestScore(correctCount);
+      updateBestScoreBadge();
+    }
+
+    /**
+     * Загружает лучший результат из localStorage
+     */
+    function loadBestScore() {
+      const stored = localStorage.getItem("frenchDaysBest");
+      return stored ? Number(stored) : null;
+    }
+
+    /**
+     * Сохраняет лучший результат при необходимости
+     */
+    function saveBestScore(score) {
+      if (bestScore === null || score > bestScore) {
+        localStorage.setItem("frenchDaysBest", String(score));
+        bestScore = score;
+      }
+    }
+
+    /**
+     * Обновляет бейдж лучшего результата
+     */
+    function updateBestScoreBadge() {
+      if (bestScore !== null) {
+        const percent = Math.round((bestScore / TOTAL_ROUNDS) * 100);
+        bestScoreEl.textContent = `Личный рекорд: ${bestScore}/${TOTAL_ROUNDS} (${percent}%)`;
+      } else {
+        bestScoreEl.textContent = "";
+      }
+    }
+
+    /**
+     * Заполняет справочную таблицу данными
+     */
+    function populateReferenceTable() {
+      if (!referenceBody) return;
+      referenceBody.innerHTML = "";
+      DAYS.forEach((day) => {
+        const row = document.createElement("tr");
+
+        const frCell = document.createElement("td");
+        frCell.textContent = day.fr;
+
+        const ipaCell = document.createElement("td");
+        ipaCell.append(createTranscriptionElement({ singleValue: day.ipa, singleClass: "ipa" }));
+
+        const ruPronCell = document.createElement("td");
+        ruPronCell.append(createTranscriptionElement({ singleValue: day.ruPron, singleClass: "ru-pron" }));
+
+        const ruCell = document.createElement("td");
+        ruCell.textContent = day.ru;
+
+        row.append(frCell, ipaCell, ruPronCell, ruCell);
+        referenceBody.appendChild(row);
+      });
+    }
+
+    /**
+     * Переключает отображение справочной таблицы
+     */
+    function toggleReferencePanel() {
+      if (!referencePanel || !showAllDaysBtn) return;
+      const isHidden = referencePanel.hasAttribute("hidden");
+      if (isHidden) {
+        populateReferenceTable();
+        referencePanel.removeAttribute("hidden");
+        showAllDaysBtn.textContent = "Скрыть все дни";
+        showAllDaysBtn.setAttribute("aria-expanded", "true");
+        if (referencePanel.scrollIntoView) {
+          referencePanel.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        if (referenceTitle && typeof referenceTitle.focus === "function") {
+          referenceTitle.focus();
+        }
+      } else {
+        collapseReferencePanel();
+        showAllDaysBtn.focus();
+      }
+    }
+
+    /**
+     * Сворачивает справочную таблицу и сбрасывает подписи кнопки
+     */
+    function collapseReferencePanel() {
+      if (!referencePanel || !showAllDaysBtn) return;
+      referencePanel.setAttribute("hidden", "");
+      showAllDaysBtn.textContent = "Показать все дни";
+      showAllDaysBtn.setAttribute("aria-expanded", "false");
+    }
+
+    /**
+     * Управление темой интерфейса
+     */
+    function toggleTheme() {
+      const root = document.documentElement;
+      const current = root.getAttribute("data-theme");
+      const nextTheme = current === "dark" ? "light" : current === "light" ? null : "dark";
+      if (nextTheme) {
+        root.setAttribute("data-theme", nextTheme);
+        localStorage.setItem("frenchDaysTheme", nextTheme);
+        themeToggle.setAttribute("aria-pressed", nextTheme === "dark" ? "true" : "false");
+      } else {
+        root.removeAttribute("data-theme");
+        localStorage.removeItem("frenchDaysTheme");
+        themeToggle.setAttribute("aria-pressed", String(window.matchMedia("(prefers-color-scheme: dark)").matches));
+      }
+    }
+
+    /**
+     * Применяет сохранённую тему при загрузке
+     */
+    function applyStoredTheme() {
+      const storedTheme = localStorage.getItem("frenchDaysTheme");
+      if (storedTheme) {
+        document.documentElement.setAttribute("data-theme", storedTheme);
+        themeToggle.setAttribute("aria-pressed", storedTheme === "dark" ? "true" : "false");
+      } else {
+        themeToggle.setAttribute("aria-pressed", String(window.matchMedia("(prefers-color-scheme: dark)").matches));
+      }
+    }
+  </script>
+</body>
+</html>
