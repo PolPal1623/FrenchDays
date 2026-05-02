@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#111827">
-  <title>Французские дни недели — тренажёр</title>
+  <title>French Learning Suite · Дни недели</title>
   <style>
     :root {
       color-scheme: light dark;
@@ -88,6 +88,75 @@
       margin: 0;
       font-size: clamp(1.5rem, 5vw, 2.2rem);
       letter-spacing: -0.01em;
+    }
+
+    .app-subtitle {
+      margin: 0.35rem 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.5;
+    }
+
+    .suite-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 0.85rem;
+      flex-wrap: wrap;
+      padding: 0.9rem 1rem;
+      border-radius: 22px;
+      background: var(--surface-strong);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .suite-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+    }
+
+    .suite-badge::before {
+      content: "";
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1d4ed8, #f97316);
+      box-shadow: 0 0 0 6px rgba(37, 99, 235, 0.12);
+    }
+
+    .suite-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.65rem;
+    }
+
+    .suite-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0.65rem 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 200ms ease, background 200ms ease, border 200ms ease;
+    }
+
+    .suite-link:hover,
+    .suite-link:focus-visible {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+      outline: none;
+      transform: translateY(-1px);
     }
 
     .theme-toggle {
@@ -495,8 +564,18 @@
 </head>
 <body>
   <main>
+    <div class="suite-bar">
+      <a class="suite-badge" href="https://polpal1623.github.io/FrenchLibrary/">French Learning Suite</a>
+      <div class="suite-actions">
+        <a class="suite-link" href="https://polpal1623.github.io/FrenchLibrary/">Все приложения</a>
+        <a class="suite-link" href="https://github.com/PolPal1623/FrenchDays">GitHub</a>
+      </div>
+    </div>
     <header>
-      <h1 class="app-title">Французские дни недели</h1>
+      <div>
+        <h1 class="app-title">Французские дни недели</h1>
+        <p class="app-subtitle">Все 7 дней проходят без повторов, а после сессии остаётся удобная шпаргалка.</p>
+      </div>
       <button class="theme-toggle" id="themeToggle" type="button" aria-pressed="false">
         <span aria-hidden="true">🌗</span>
         <span>Тема</span>
@@ -515,7 +594,7 @@
       <button class="secondary-btn continue-btn" id="continueButton" type="button" hidden>Продолжить</button>
       <div class="progress-container">
         <div class="progress-text">
-          <span id="progressText">Раунд 0/8</span>
+          <span id="progressText">Раунд 0/7</span>
           <span id="scoreText">0 правильных</span>
         </div>
         <div class="progress-bar" aria-hidden="true">
@@ -578,7 +657,7 @@
     ];
 
     // --- Константы приложения ---
-    const TOTAL_ROUNDS = 8;
+    const TOTAL_ROUNDS = DAYS.length;
     const QUESTION_TYPES = {
       INPUT: "input",
       CHOICE: "choice"
